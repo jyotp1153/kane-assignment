@@ -70,6 +70,46 @@ public class AssignmentServiceImpl implements AssignmentService {
         }
     }
 
+    @Override
+    public List<PersonResponseDto> getAllPersonDetail(MultipartFile file) {
+        return getAllValidResult(file);
+    }
+
+    private List<PersonResponseDto> getAllValidResult(MultipartFile file) {
+        List<PersonResponseDto> outputList = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(file.getInputStream()))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                PersonDto person = csvUtil.parsePerson(line);
+                if (person == null) {
+                    continue;
+                }
+                if (!isValidEmail(person.getEmail())) {
+                    continue;
+                }
+                if (!hasAddress(person.getAddress())) {
+                    continue;
+                }
+                if (!isIndian(person.getAddress())) {
+                    continue;
+                }
+                outputList.add(
+                        new PersonResponseDto(
+                                person.getName(),
+                                person.getCategory(),
+                                person.getAge(),
+                                person.getAddress(),
+                                person.getEmail()
+                        )
+                );
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        return outputList;
+    }
+
     private String getCategory(Integer age) {
 
         return age >= 18

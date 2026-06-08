@@ -1,5 +1,6 @@
 package com.kane.controller;
 
+import com.kane.dto.PersonResponseDto;
 import com.kane.service.AssignmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -9,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/file-service")
@@ -24,5 +27,14 @@ public class AssignmentController {
             @RequestParam("file")
             MultipartFile file) {
         return assignmentService.processFile(file);
+    }
+
+    @Operation(summary = "Upload TXT file and generate CSV")
+    @GetMapping(value = "/getAllValidDetail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<List<PersonResponseDto>> getAllValidDetail(
+            @Parameter(description = "Upload Input TXT File")
+            @RequestParam("file")
+            MultipartFile file) {
+        return ResponseEntity.ok(assignmentService.getAllPersonDetail(file));
     }
 }
