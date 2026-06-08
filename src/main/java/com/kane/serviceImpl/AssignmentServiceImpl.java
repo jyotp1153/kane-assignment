@@ -1,11 +1,12 @@
 package com.kane.serviceImpl;
 
+import com.kane.constant.ApiErrorCodes;
 import com.kane.dto.PersonDto;
-import com.kane.dto.PersonResponseDto;
+import com.kane.dto.res.person.PersonResponseDto;
+import com.kane.exception.NoSuchElementFoundException;
 import com.kane.service.AssignmentService;
 import com.kane.util.CsvUtil;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -29,8 +30,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     public ResponseEntity<Resource> processFile(MultipartFile file) {
         List<PersonResponseDto> outputList = new ArrayList<>();
 
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(file.getInputStream()))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             String line;
             while ((line = br.readLine()) != null) {
                 PersonDto person = csvUtil.parsePerson(line);
@@ -46,27 +46,15 @@ public class AssignmentServiceImpl implements AssignmentService {
                 if (!isIndian(person.getAddress())) {
                     continue;
                 }
-                outputList.add(
-                        new PersonResponseDto(
-                                person.getName(),
-                                person.getCategory(),
-                                person.getAge(),
-                                person.getAddress(),
-                                person.getEmail()
-                        )
-                );
+                outputList.add(new PersonResponseDto(person.getName(), person.getCategory(), person.getAge(), person.getAddress(), person.getEmail()));
             }
 
             byte[] csv = generateCsv(outputList);
             ByteArrayResource resource = new ByteArrayResource(csv);
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=output.csv")
-                    .contentType(MediaType.parseMediaType("text/csv"))
-                    .body(resource);
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=output.csv").contentType(MediaType.parseMediaType("text/csv")).body(resource);
 
         } catch (Exception ex) {
-
-            throw new RuntimeException(ex);
+            throw new NoSuchElementFoundException(ApiErrorCodes.FILE_PARSING_ERROR.getErrorCode(), ApiErrorCodes.FILE_PARSING_ERROR.getErrorMessage());
         }
     }
 
@@ -77,8 +65,7 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     private List<PersonResponseDto> getAllValidResult(MultipartFile file) {
         List<PersonResponseDto> outputList = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(file.getInputStream()))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             String line;
             while ((line = br.readLine()) != null) {
                 PersonDto person = csvUtil.parsePerson(line);
@@ -94,15 +81,7 @@ public class AssignmentServiceImpl implements AssignmentService {
                 if (!isIndian(person.getAddress())) {
                     continue;
                 }
-                outputList.add(
-                        new PersonResponseDto(
-                                person.getName(),
-                                person.getCategory(),
-                                person.getAge(),
-                                person.getAddress(),
-                                person.getEmail()
-                        )
-                );
+                outputList.add(new PersonResponseDto(person.getName(), person.getCategory(), person.getAge(), person.getAddress(), person.getEmail()));
             }
         } catch (Exception ex) {
             throw new RuntimeException(ex);
@@ -111,51 +90,28 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     private String getCategory(Integer age) {
-
-        return age >= 18
-                ? "Adult"
-                : "Kid";
+        return age >= 18 ? "Adult" : "Kid";
     }
 
     private boolean hasAddress(String address) {
-
-        return address != null &&
-                !address.trim().isEmpty();
+        return address != null && !address.trim().isEmpty();
     }
 
     private boolean isIndian(String address) {
-
-        return address.toLowerCase()
-                .contains("india");
+        return address.toLowerCase().contains("india");
     }
 
     private boolean isValidEmail(String email) {
-
-        return email.matches(
-                "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"
-        );
+        return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
     }
 
+    private byte[] generateCsv(List<PersonResponseDto> outputList) {
 
-    private byte[] generateCsv(
-            List<PersonResponseDto> outputList) {
-
-        StringBuilder csvBuilder =
-                new StringBuilder();
-
+        StringBuilder csvBuilder = new StringBuilder();
         csvBuilder.append("Name,Category\n");
-
         for (PersonResponseDto dto : outputList) {
-
-            csvBuilder
-                    .append(dto.getName())
-                    .append(",")
-                    .append(dto.getCategory())
-                    .append("\n");
+            csvBuilder.append(dto.getName()).append(",").append(dto.getCategory()).append("\n");
         }
-
-        return csvBuilder
-                .toString()
-                .getBytes(StandardCharsets.UTF_8);
+        return csvBuilder.toString().getBytes(StandardCharsets.UTF_8);
     }
 }

@@ -1,6 +1,6 @@
 package com.kane.controller;
 
-import com.kane.dto.PersonResponseDto;
+import com.kane.dto.res.person.PersonResponseDto;
 import com.kane.service.AssignmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,8 +29,8 @@ public class AssignmentController {
         return assignmentService.processFile(file);
     }
 
-    @Operation(summary = "Upload TXT file and generate CSV")
-    @GetMapping(value = "/getAllValidDetail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Upload TXT file and see all valid detail")
+    @PostMapping(value = "/getAllValidDetail", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<List<PersonResponseDto>> getAllValidDetail(
             @Parameter(description = "Upload Input TXT File")
             @RequestParam("file")

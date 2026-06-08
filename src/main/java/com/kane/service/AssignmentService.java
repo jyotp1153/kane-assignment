@@ -1,6 +1,6 @@
 package com.kane.service;
 
-import com.kane.dto.PersonResponseDto;
+import com.kane.dto.res.person.PersonResponseDto;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
