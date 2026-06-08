@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: Kane
+
+
+server:
+  port: 9052
+  servlet:
+    context-path: /kane-service
+
+jwt:
+  secret: ABCDEFGHIJfVIVEKghklKLMNNDHDNDO01234persisjpandeydcjsdcknsjdt5PQRSUVWXYZabcdemnouvwxyz664565665178-_
+
+
+application:
+  config:
+    trace: true
+
+springdoc:
+  api-docs:
+    path: /v1/api-docs
+
+
+swagger:
+  config:
+    local-url: http://localhost:9052/kane-service
+    title: Kane assignment service APIs.
